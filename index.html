@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#0e1512" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#1a7f5a" media="(prefers-color-scheme: light)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="22">
+<title>22 · Aligners (Toggl)</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<noscript><p style="padding:24px;font-family:sans-serif">This app needs JavaScript.</p></noscript>
+
+<!-- ============ SETUP SCREEN (first run / settings) ============ -->
+<main id="setup" class="setup" hidden>
+  <div class="setup-card">
+    <div class="brand setup-brand">22</div>
+    <h1>Connect Toggl</h1>
+    <p class="setup-lead">“22” logs every time you take your aligners out as a <strong>Toggl Track</strong> time entry — so your wear-time lives in the same place as the rest of your day. Because Toggl’s API can’t be called from a browser, a tiny Google Apps Script you own does it for you. One-time setup.</p>
+
+    <ol class="setup-steps">
+      <li>Deploy the backend Apps Script (holds <em>your</em> Toggl token) and copy its Web-app <code>/exec</code> URL.
+        <span class="hint">Full recipe in <code>backend/DEPLOY.md</code> — ~5 min, paste the token into Script Properties, deploy “Execute as Me / Anyone”.</span>
+      </li>
+      <li>Paste that URL here:
+        <input id="setupUrl" type="url" placeholder="https://script.google.com/macros/s/AKfy…/exec" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </li>
+    </ol>
+
+    <div class="setup-actions">
+      <button id="setupConnect" class="solid-btn">Connect &amp; start</button>
+    </div>
+
+    <details class="setup-advanced">
+      <summary>Setting this up for Jason?</summary>
+      <p class="hint">Jason runs his own copy: he deploys the same <code>backend/Code.gs</code> under his Google account with <em>his</em> Toggl token in Script Properties, then pastes <em>his</em> <code>/exec</code> URL above. His token never touches this app — only his proxy URL does. (The Settings gear ⚙ re-opens this screen anytime.)</p>
+    </details>
+
+    <div id="setupStatus" class="setup-status"></div>
+    <p class="setup-foot">Only the <code>/exec</code> URL is stored on this device — never your Toggl token. The URL is an unguessable secret; revoke it anytime by deleting the deployment.</p>
+  </div>
+</main>
+
+<!-- ============ MAIN APP ============ -->
+<main id="app" class="app" aria-live="polite" hidden>
+
+  <header class="topbar">
+    <div class="brand">22</div>
+    <div class="topbar-right">
+      <span class="conn" id="conn" title="Connection">●</span>
+      <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <button id="toggle" class="ring-btn" aria-label="Toggle aligners in or out">
+      <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
+        <circle class="ring-track" cx="120" cy="120" r="108"/>
+        <circle id="ringFill" class="ring-fill" cx="120" cy="120" r="108" transform="rotate(-90 120 120)"/>
+      </svg>
+      <span class="ring-inner">
+        <span id="stateLabel" class="state-label">IN</span>
+        <span id="bigValue" class="big-value">2h 00m</span>
+        <span id="bigCaption" class="big-caption">out-budget left</span>
+      </span>
+    </button>
+    <p id="actionHint" class="action-hint">Tap when you take them out</p>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><div class="stat-value" id="wornToday">0h 00m</div><div class="stat-label">worn today</div></div>
+    <div class="stat"><div class="stat-value" id="outToday">0m</div><div class="stat-label">out today</div></div>
+    <div class="stat"><div class="stat-value" id="targetLabel">22h</div><div class="stat-label">daily target</div></div>
+  </section>
+
+  <section class="history">
+    <h2 class="section-title">Last 7 days</h2>
+    <div id="historyStrip" class="history-strip"></div>
+  </section>
+
+  <section class="voice-card">
+    <h2 class="section-title">Source of truth</h2>
+    <p>Every out-window is a <strong>Toggl time entry</strong> named “Aligners OUT”. Edit, split, or delete an entry in <a href="https://track.toggl.com/timer" target="_blank" rel="noopener">Toggl</a> and this app reflects it on the next refresh — Toggl is the log, so there’s nothing to “fix” here.</p>
+  </section>
+
+  <footer class="foot"><span id="lastSync">—</span></footer>
+</main>
+
+<script src="./wear-core.js"></script>
+<script src="./toggl-store.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

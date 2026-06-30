@@ -1,0 +1,17 @@
+{
+  "name": "22 — Aligner Wear Tracker (Toggl)",
+  "short_name": "22",
+  "description": "Keep your clear aligners in for 22 hours a day. Out-windows logged as Toggl Track time entries.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1512",
+  "theme_color": "#1a7f5a",
+  "categories": ["health", "lifestyle", "medical"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
