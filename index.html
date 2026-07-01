@@ -22,15 +22,13 @@
 <main id="setup" class="setup" hidden>
   <div class="setup-card">
     <div class="brand setup-brand">22</div>
-    <h1>Connect Toggl</h1>
-    <p class="setup-lead">“22” logs every time you take your aligners out as a <strong>Toggl Track</strong> time entry — so your wear-time lives in the same place as the rest of your day. Because Toggl’s API can’t be called from a browser, a tiny Google Apps Script you own does it for you. One-time setup.</p>
+    <h1>Connect your Toggl</h1>
+    <p class="setup-lead">“22” logs every aligner break as a <strong>Toggl Track</strong> time entry in <em>your own</em> Toggl account. Just paste your Toggl API token below — that’s it.</p>
 
     <ol class="setup-steps">
-      <li>Deploy the backend Apps Script (holds <em>your</em> Toggl token) and copy its Web-app <code>/exec</code> URL.
-        <span class="hint">Full recipe in <code>backend/DEPLOY.md</code> — ~5 min, paste the token into Script Properties, deploy “Execute as Me / Anyone”.</span>
-      </li>
-      <li>Paste that URL here:
-        <input id="setupUrl" type="url" placeholder="https://script.google.com/macros/s/AKfy…/exec" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <li>Get your token: in Toggl, open <a href="https://track.toggl.com/profile" target="_blank" rel="noopener">Profile settings</a> → scroll to <strong>API Token</strong> → copy.</li>
+      <li>Paste it here:
+        <input id="setupToken" type="password" placeholder="your Toggl API token" autocomplete="off" autocapitalize="off" spellcheck="false">
       </li>
     </ol>
 
@@ -38,13 +36,14 @@
       <button id="setupConnect" class="solid-btn">Connect &amp; start</button>
     </div>
 
-    <details class="setup-advanced">
-      <summary>Setting this up for Jason?</summary>
-      <p class="hint">Jason runs his own copy: he deploys the same <code>backend/Code.gs</code> under his Google account with <em>his</em> Toggl token in Script Properties, then pastes <em>his</em> <code>/exec</code> URL above. His token never touches this app — only his proxy URL does. (The Settings gear ⚙ re-opens this screen anytime.)</p>
+    <details class="setup-advanced" id="devProxyBox">
+      <summary>Dev setup (already done for you)</summary>
+      <p class="hint">Toggl’s API can’t be called from a browser, so a tiny stateless Google Apps Script relay sits in between. The dev deploys it once; it holds no tokens. Paste its <code>/exec</code> URL here only if it isn’t already built into the app.</p>
+      <input id="setupProxy" type="url" placeholder="https://script.google.com/macros/s/AKfy…/exec" autocomplete="off" autocapitalize="off" spellcheck="false">
     </details>
 
     <div id="setupStatus" class="setup-status"></div>
-    <p class="setup-foot">Only the <code>/exec</code> URL is stored on this device — never your Toggl token. The URL is an unguessable secret; revoke it anytime by deleting the deployment.</p>
+    <p class="setup-foot">Your token is stored only on this device and sent through the relay to Toggl. Your wear data lives in <em>your</em> Toggl — never anyone else’s account. Revoke the token anytime in Toggl’s profile settings.</p>
   </div>
 </main>
 

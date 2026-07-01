@@ -71,20 +71,29 @@
     if (!_fetch) throw new Error('toggl-store: no fetch available');
 
     let execUrl = opts.execUrl || null;
+    // The USER's own Toggl API token — sent to the stateless relay per request,
+    // so wear entries land in THAT user's Toggl. The relay stores no tokens.
+    let token = opts.token || null;
     // Device timezone so the proxy resolves "today" the same way the phone does.
     const tz = opts.tz ||
       ((typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC');
 
     function setExecUrl(u) { execUrl = u; }
-    function isConfigured() { return !!execUrl; }
+    function setToken(t) { token = t; }
+    // Configured = we have both the relay URL AND the user's token.
+    function isConfigured() { return !!execUrl && !!token; }
 
-    // Build the GET URL with action + tz + cache-buster (Apps Script caches).
+    // Build the GET URL with action + tz + token + cache-buster. Sent as query
+    // params (not headers) so the request stays "simple" — Apps Script web apps
+    // can't answer a CORS preflight. HTTPS encrypts the query string in transit.
     function urlFor(action) {
-      if (!execUrl) throw new Error('toggl-store: not configured (no exec URL)');
+      if (!execUrl) throw new Error('toggl-store: not configured (no relay URL)');
+      if (!token) throw new Error('toggl-store: not configured (no Toggl token)');
       const sep = execUrl.indexOf('?') === -1 ? '?' : '&';
       return execUrl + sep +
         'action=' + encodeURIComponent(action) +
         '&tz=' + encodeURIComponent(tz) +
+        '&toggl_token=' + encodeURIComponent(token) +
         '&cb=' + encodeURIComponent(cacheBuster());
     }
 
@@ -126,7 +135,7 @@
 
     return {
       ENTRY_DESCRIPTION, tz,
-      setExecUrl, isConfigured, readState, goOut, goIn,
+      setExecUrl, setToken, isConfigured, readState, goOut, goIn,
       get execUrl() { return execUrl; },
     };
   }

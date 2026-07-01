@@ -21,17 +21,25 @@
   const RESYNC_MS = 60000;
   const WARN_MS = 30 * 60000;
 
+  // DEV-SET, once: the generic stateless Toggl relay this app talks to. It holds
+  // NO tokens — the user's Toggl token is sent per request. The dev deploys the
+  // relay once and hardcodes its /exec URL here so users never see Apps Script.
+  // (Empty by default; falls back to a user-pasted proxy URL via the dev box.)
+  const DEFAULT_PROXY_URL = '';
+
   // ---- persistent settings + offline cache --------------------------------
   const LS = {
-    execUrl: 'aligners.toggl.execUrl',
+    token: 'aligners.toggl.token',      // the user's OWN Toggl API token
+    proxy: 'aligners.toggl.proxyUrl',   // dev relay URL (usually DEFAULT_PROXY_URL)
     log: 'aligners.toggl.log.v1',
   };
   const get = (k) => localStorage.getItem(k);
   const set = (k, v) => localStorage.setItem(k, v);
   const loadLocalLog = () => { try { return JSON.parse(get(LS.log)) || []; } catch (_) { return []; } };
   const saveLocalLog = (log) => set(LS.log, JSON.stringify(log || []));
+  const proxyUrl = () => (get(LS.proxy) || DEFAULT_PROXY_URL || '').trim();
 
-  let store = TogglStore.makeStore({ execUrl: get(LS.execUrl), tz: TZ });
+  let store = TogglStore.makeStore({ execUrl: proxyUrl(), token: get(LS.token), tz: TZ });
   let online = true, snap = null, tickTimer = null, busy = false;
 
   const $ = (id) => document.getElementById(id);
@@ -39,7 +47,7 @@
   const els = {};
   ['toggle','ringFill','stateLabel','bigValue','bigCaption','actionHint','wornToday','outToday',
    'targetLabel','historyStrip','conn','lastSync','settingsBtn',
-   'setupUrl','setupConnect','setupStatus'
+   'setupToken','setupProxy','setupConnect','setupStatus'
   ].forEach(id => els[id] = $(id));
 
   // ---- formatting ----
@@ -53,22 +61,27 @@
 
   // ---- setup flow ----------------------------------------------------------
   async function doConnect() {
-    const url = (els.setupUrl.value || '').trim();
-    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(url)) {
-      setupMsg('Paste your Apps Script Web-app /exec URL (https://script.google.com/macros/s/…/exec).', true);
+    const token = (els.setupToken.value || '').trim();
+    // Dev-box proxy override is optional; default is the built-in relay URL.
+    const proxyOverride = (els.setupProxy && els.setupProxy.value || '').trim();
+    const proxy = proxyOverride || proxyUrl();
+    if (!token) { setupMsg('Paste your Toggl API token first.', true); return; }
+    if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(proxy)) {
+      setupMsg('No relay URL configured. Open “Dev setup” and paste the /exec URL (one-time, done by the dev).', true);
       return;
     }
-    setupMsg('Connecting to your proxy…');
-    const s = TogglStore.makeStore({ execUrl: url, tz: TZ });
+    setupMsg('Connecting to your Toggl…');
+    const s = TogglStore.makeStore({ execUrl: proxy, token: token, tz: TZ });
     try {
-      const state = await s.readState();   // verifies the proxy + Toggl token work
-      set(LS.execUrl, url);
+      const state = await s.readState();   // verifies the relay + the user's token work
+      set(LS.token, token);
+      if (proxyOverride) set(LS.proxy, proxyOverride);
       saveLocalLog(state.log);
       store = s;
       setupMsg('Connected! Starting…');
       await enterApp();
     } catch (e) {
-      setupMsg('Couldn’t reach Toggl through that URL: ' + e.message, true);
+      setupMsg('Couldn’t reach your Toggl: ' + e.message, true);
     }
   }
 
@@ -206,7 +219,8 @@
     els.toggle.addEventListener('click', toggle);
     els.settingsBtn.addEventListener('click', () => {
       els.setupStatus.textContent = '';
-      els.setupUrl.value = store.execUrl || '';
+      els.setupToken.value = get(LS.token) || '';
+      if (els.setupProxy) els.setupProxy.value = get(LS.proxy) || '';
       showSetup();
     });
 
