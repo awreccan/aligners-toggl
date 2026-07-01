@@ -25,7 +25,7 @@
   // NO tokens — the user's Toggl token is sent per request. The dev deploys the
   // relay once and hardcodes its /exec URL here so users never see Apps Script.
   // (Empty by default; falls back to a user-pasted proxy URL via the dev box.)
-  const DEFAULT_PROXY_URL = '';
+  const DEFAULT_PROXY_URL = 'https://script.google.com/macros/s/AKfycbxwZZRPd0toLBRM2Qhxt16VqObC8-7a8ABPHV--9pnMaNg7y1JWMPa3jMhuwvIpHRTksw/exec';
 
   // ---- persistent settings + offline cache --------------------------------
   const LS = {
