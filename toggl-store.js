@@ -106,12 +106,24 @@
 
     // All three actions are GETs to the proxy — Apps Script doGet handles them
     // and they avoid a CORS preflight (simple request, no custom headers).
+    // A HARD TIMEOUT is essential: without it a hung relay fetch never settles,
+    // so the caller's `busy` guard never clears and the toggle button dies
+    // permanently. AbortController bounds every request to ~15s.
     async function call(action) {
-      const res = await _fetch(urlFor(action), { method: 'GET', cache: 'no-store' });
-      if (!res.ok) throw new Error('proxy ' + action + ' failed: HTTP ' + res.status);
-      const data = await res.json();
-      if (data && data.error) throw new Error('proxy ' + action + ': ' + data.error + (data.detail ? ' — ' + data.detail : ''));
-      return data;
+      const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      const timer = ctrl ? setTimeout(() => ctrl.abort(), 15000) : null;
+      try {
+        const res = await _fetch(urlFor(action), { method: 'GET', cache: 'no-store', signal: ctrl ? ctrl.signal : undefined });
+        if (!res.ok) throw new Error('proxy ' + action + ' failed: HTTP ' + res.status);
+        const data = await res.json();
+        if (data && data.error) throw new Error('proxy ' + action + ': ' + data.error + (data.detail ? ' — ' + data.detail : ''));
+        return data;
+      } catch (e) {
+        if (e && e.name === 'AbortError') throw new Error('proxy ' + action + ' timed out (no response in 15s)');
+        throw e;
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
     }
 
     // Returns { log, running, today, tz, serverNow } — log is ready for
