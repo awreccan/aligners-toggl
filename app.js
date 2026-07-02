@@ -214,7 +214,7 @@
   // ---- boot ----------------------------------------------------------------
   function boot() {
     els.setupConnect.addEventListener('click', doConnect);
-    els.setupUrl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doConnect(); });
+    els.setupToken.addEventListener('keydown', (e) => { if (e.key === 'Enter') doConnect(); });
 
     els.toggle.addEventListener('click', toggle);
     els.settingsBtn.addEventListener('click', () => {
