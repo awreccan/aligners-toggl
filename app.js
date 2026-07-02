@@ -48,7 +48,7 @@
   ['toggle','ringFill','stateLabel','bigValue','bigCaption','actionHint','wornToday','outToday',
    'targetLabel','historyStrip','conn','lastSync','settingsBtn','syncBtn',
    'setupToken','setupProxy','setupConnect','setupStatus','setupClose',
-   'siriHelp','siriModal','siriClose','siriNeedsSetup'
+   'tabConnect','tabSiri','panelConnect','panelSiri','siriNeedsSetup','voiceSetupLink'
   ].forEach(id => els[id] = $(id));
 
   // ---- formatting ----
@@ -57,13 +57,27 @@
   const fmtMs = (ms) => fmtHM(ms/60000);
 
   // ---- screen routing ------------------------------------------------------
-  function showSetup() {
+  function showSetup(tab) {
     setupEl.hidden = false; appEl.hidden = true;
     // Offer an X to leave settings ONLY when a backend is already configured —
     // on true first-run there's nothing to return to, so no dead-end close.
     if (els.setupClose) els.setupClose.hidden = !store.isConfigured();
+    selectTab(tab || 'connect');
   }
   function showApp() { setupEl.hidden = true; appEl.hidden = false; }
+
+  // ---- setup tabs (Connect | Set up Siri) ----------------------------------
+  // The Siri instructions live in a tab of the setup screen (not a modal), so
+  // they never linger on the main screen once Siri is configured. Switching to
+  // the Siri tab (re)fills the copy boxes from the stored credential.
+  function selectTab(which) {
+    const siri = which === 'siri';
+    if (els.tabConnect) els.tabConnect.setAttribute('aria-selected', siri ? 'false' : 'true');
+    if (els.tabSiri) els.tabSiri.setAttribute('aria-selected', siri ? 'true' : 'false');
+    if (els.panelConnect) els.panelConnect.hidden = siri;
+    if (els.panelSiri) els.panelSiri.hidden = !siri;
+    if (siri) fillSiri();
+  }
 
   // ---- setup flow ----------------------------------------------------------
   async function doConnect() {
@@ -253,19 +267,19 @@
       in: base + sep + 'action=in&toggl_token=' + encodeURIComponent(token),
     };
   }
-  function openSiri() {
+  // Fill the Siri-tab copy boxes from the stored credential. Called whenever the
+  // Siri tab is shown, so a freshly-connected token is reflected immediately.
+  function fillSiri() {
     const urls = siriUrls();
     const ok = !!urls;
     if (els.siriNeedsSetup) els.siriNeedsSetup.hidden = ok;
-    document.querySelectorAll('#siriModal [data-fill]').forEach(el => {
+    document.querySelectorAll('#panelSiri [data-fill]').forEach(el => {
       const key = el.getAttribute('data-fill');
-      el.textContent = ok ? (key === 'out-url' ? urls.out : urls.in) : '(connect the app first)';
+      el.textContent = ok ? (key === 'out-url' ? urls.out : urls.in) : '(connect on the Connect tab first)';
     });
-    if (els.siriModal) els.siriModal.hidden = false;
   }
-  function closeSiri() { if (els.siriModal) els.siriModal.hidden = true; }
   function wireCopyButtons() {
-    document.querySelectorAll('#siriModal .copy-btn').forEach(btn => {
+    document.querySelectorAll('#panelSiri .copy-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const urls = siriUrls();
         if (!urls) return;
@@ -287,15 +301,23 @@
     if (els.syncBtn) els.syncBtn.addEventListener('click', () => { if (store.isConfigured()) refresh(); });
     // X on the setup card: return to the app (only meaningful when configured).
     if (els.setupClose) els.setupClose.addEventListener('click', () => { if (store.isConfigured()) enterApp(); });
-    if (els.siriHelp) els.siriHelp.addEventListener('click', openSiri);
-    if (els.siriClose) els.siriClose.addEventListener('click', closeSiri);
-    if (els.siriModal) els.siriModal.addEventListener('click', (e) => { if (e.target === els.siriModal) closeSiri(); });
+    // Setup tabs: Connect | Set up Siri.
+    if (els.tabConnect) els.tabConnect.addEventListener('click', () => selectTab('connect'));
+    if (els.tabSiri) els.tabSiri.addEventListener('click', () => selectTab('siri'));
     wireCopyButtons();
     els.settingsBtn.addEventListener('click', () => {
       els.setupStatus.textContent = '';
       els.setupToken.value = get(LS.token) || '';
       if (els.setupProxy) els.setupProxy.value = get(LS.proxy) || '';
-      showSetup();
+      showSetup('connect');
+    });
+    // Main-screen "Set up Siri" pointer → open Settings straight to the Siri tab.
+    if (els.voiceSetupLink) els.voiceSetupLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      els.setupStatus.textContent = '';
+      els.setupToken.value = get(LS.token) || '';
+      if (els.setupProxy) els.setupProxy.value = get(LS.proxy) || '';
+      showSetup('siri');
     });
 
     window.addEventListener('online', () => { setOnline(true); refresh(); });

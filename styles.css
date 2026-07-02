@@ -35,9 +35,19 @@ body {
 }
 
 /* ===== setup screen ===== */
-.setup { max-width: 480px; margin: 0 auto; padding: 24px 18px 60px; min-height: 100%; display: flex; align-items: center; }
+.setup { max-width: 620px; margin: 0 auto; padding: 24px 18px 60px; min-height: 100%; display: flex; align-items: flex-start; }
 .setup-card { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 26px 22px; box-shadow: var(--shadow); width: 100%; }
+  padding: 22px 22px 26px; box-shadow: var(--shadow); width: 100%; margin-top: 24px; }
+
+/* setup tabs: Connect | Set up Siri */
+.setup-tabs { display: flex; gap: 6px; background: var(--bg); border: 1px solid var(--line);
+  border-radius: 12px; padding: 4px; margin: 4px 0 20px; }
+.setup-tab { flex: 1; border: none; background: none; color: var(--muted); font-family: inherit;
+  font-size: 14.5px; font-weight: 600; padding: 10px 8px; border-radius: 9px; cursor: pointer; }
+.setup-tab[aria-selected="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+.setup-panel { animation: fadein .18s ease; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .setup-panel { animation: none; } }
 /* X to leave settings — only shown (via JS) when a backend is already configured,
    so first-run users (nothing to return to) don't see a dead-end close. */
 .setup-close { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;
@@ -159,31 +169,33 @@ code { font-family: var(--mono); font-size: .85em; background: var(--line);
 
 .foot { text-align: center; font-family: var(--mono); font-size: 11px; color: var(--muted); }
 
-/* voice card: Siri helper button + source-of-truth note */
-.voice-card .solid-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; margin-top: 4px; }
-.voice-src { margin: 14px 0 0 !important; font-size: 12.5px; }
+/* voice card: slim main-screen pointer (real Siri steps live in Settings → Set up Siri) */
+.voice-card .voice-hint { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+.voice-card .voice-hint strong { color: var(--ink); }
+.voice-card .voice-hint a { color: var(--green); font-weight: 600; white-space: nowrap; }
+.voice-src { margin: 0 !important; font-size: 12.5px; }
 .voice-src a { color: var(--green); font-weight: 600; }
 
-/* ===== Siri setup helper (modal) ===== */
-.siri-modal { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.5);
-  display: flex; align-items: flex-start; justify-content: center; overflow-y: auto;
-  padding: env(safe-area-inset-top) 0 40px; }
-.siri-sheet { position: relative; background: var(--panel); border: 1px solid var(--line);
-  border-radius: var(--radius); box-shadow: var(--shadow); width: min(94vw, 560px);
-  margin: 24px 12px; padding: 24px 22px 28px; }
-.siri-title { font-size: 21px; margin: 0 34px 6px 0; letter-spacing: -.02em; }
+/* ===== Siri setup — inside the setup screen's "Set up Siri" tab ===== */
 .siri-lead { color: var(--muted); font-size: 14.5px; margin: 0 0 14px; }
 .siri-lead strong { color: var(--ink); }
 .siri-warn { background: var(--line); border-radius: 12px; padding: 10px 12px;
   font-size: 13px; color: var(--ink); margin: 0 0 14px; }
-.siri-step { margin: 18px 0; }
-.siri-step h3 { font-size: 15px; margin: 0 0 6px; display: flex; align-items: center; gap: 9px; }
-.siri-step p { font-size: 14px; color: var(--muted); margin: 6px 0; }
-.siri-step p strong { color: var(--ink); }
-.siri-step .sc { font-family: var(--mono); background: var(--green); color: #fff;
+.siri-warn strong { color: var(--ink); }
+/* each step is a collapsible accordion so the panel isn't a wall of text */
+.siri-acc { border: 1px solid var(--line); border-radius: 12px; margin: 10px 0; overflow: hidden; background: var(--bg); }
+.siri-acc > summary { list-style: none; cursor: pointer; padding: 13px 14px; font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; gap: 10px; color: var(--ink); }
+.siri-acc > summary::-webkit-details-marker { display: none; }
+.siri-acc > summary::after { content: "▸"; margin-left: auto; color: var(--muted); transition: transform .2s; }
+.siri-acc[open] > summary::after { transform: rotate(90deg); }
+.siri-acc .acc-body { padding: 2px 14px 14px; }
+.siri-acc .sc { font-family: var(--mono); background: var(--green); color: #fff;
   width: 26px; height: 26px; display: inline-grid; place-items: center; border-radius: 8px;
   font-size: 13px; flex: none; }
-@media (prefers-color-scheme: dark) { .siri-step .sc { color: #07120d; } }
+@media (prefers-color-scheme: dark) { .siri-acc .sc { color: #07120d; } }
+.siri-acc p { font-size: 14px; color: var(--muted); margin: 8px 0; }
+.siri-acc p strong { color: var(--ink); }
 .siri-note { font-size: 12.5px !important; font-style: italic; }
 .copybox { display: flex; align-items: stretch; gap: 8px; margin: 8px 0; }
 .copybox code { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12px;

@@ -13,39 +13,98 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
-<link rel="stylesheet" href="./styles.css?v=4">
+<link rel="stylesheet" href="./styles.css?v=5">
 </head>
 <body>
 <noscript><p style="padding:24px;font-family:sans-serif">This app needs JavaScript.</p></noscript>
 
-<!-- ============ SETUP SCREEN (first run / settings) ============ -->
+<!-- ============ SETUP SCREEN (first run / settings) — Connect + Siri tabs ============ -->
 <main id="setup" class="setup" hidden>
   <div class="setup-card">
     <button id="setupClose" class="setup-close" hidden aria-label="Close settings" title="Close">✕</button>
     <div class="brand setup-brand">22</div>
-    <h1>Connect your Toggl</h1>
-    <p class="setup-lead">“22” logs every aligner break as a <strong>Toggl Track</strong> time entry in <em>your own</em> Toggl account. Just paste your Toggl API token below — that’s it.</p>
 
-    <ol class="setup-steps">
-      <li><strong>Install it first.</strong> In <strong>Safari</strong>, tap <strong>Share</strong> (the square with an up-arrow) → <strong>Add to Home Screen</strong>. You’ll get a “22” icon that opens like a real app.</li>
-      <li>Get your token: in Toggl, open <a href="https://track.toggl.com/profile" target="_blank" rel="noopener">Profile settings</a> → scroll to <strong>API Token</strong> → copy. <span class="hint">(No Toggl account yet? Make a free one at <a href="https://track.toggl.com" target="_blank" rel="noopener">track.toggl.com</a>.)</span></li>
-      <li>Paste it here:
-        <input id="setupToken" type="password" placeholder="your Toggl API token" autocomplete="off" autocapitalize="off" spellcheck="false">
-      </li>
-    </ol>
-
-    <div class="setup-actions">
-      <button id="setupConnect" class="solid-btn">Connect &amp; start</button>
+    <div class="setup-tabs" role="tablist" aria-label="Setup">
+      <button id="tabConnect" class="setup-tab" role="tab" aria-selected="true" aria-controls="panelConnect">Connect</button>
+      <button id="tabSiri" class="setup-tab" role="tab" aria-selected="false" aria-controls="panelSiri">Set up Siri</button>
     </div>
 
-    <details class="setup-advanced" id="devProxyBox">
-      <summary>Dev setup (already done for you)</summary>
-      <p class="hint">Toggl’s API can’t be called from a browser, so a tiny stateless Google Apps Script relay sits in between. The dev deploys it once; it holds no tokens. Paste its <code>/exec</code> URL here only if it isn’t already built into the app.</p>
-      <input id="setupProxy" type="url" placeholder="https://script.google.com/macros/s/AKfy…/exec" autocomplete="off" autocapitalize="off" spellcheck="false">
-    </details>
+    <!-- ---- CONNECT panel ---- -->
+    <section id="panelConnect" class="setup-panel" role="tabpanel" aria-labelledby="tabConnect">
+      <h1>Connect your Toggl</h1>
+      <p class="setup-lead">“22” logs every aligner break as a <strong>Toggl Track</strong> time entry in <em>your own</em> Toggl account. Just paste your Toggl API token below — that’s it.</p>
 
-    <div id="setupStatus" class="setup-status"></div>
-    <p class="setup-foot">Your token is stored only on this device and sent through the relay to Toggl. Your wear data lives in <em>your</em> Toggl — never anyone else’s account. Revoke the token anytime in Toggl’s profile settings.</p>
+      <ol class="setup-steps">
+        <li><strong>Install it first.</strong> In <strong>Safari</strong>, tap <strong>Share</strong> (the square with an up-arrow) → <strong>Add to Home Screen</strong>. You’ll get a “22” icon that opens like a real app.</li>
+        <li>Get your token: in Toggl, open <a href="https://track.toggl.com/profile" target="_blank" rel="noopener">Profile settings</a> → scroll to <strong>API Token</strong> → copy. <span class="hint">(No Toggl account yet? Make a free one at <a href="https://track.toggl.com" target="_blank" rel="noopener">track.toggl.com</a>.)</span></li>
+        <li>Paste it here:
+          <input id="setupToken" type="password" placeholder="your Toggl API token" autocomplete="off" autocapitalize="off" spellcheck="false">
+        </li>
+      </ol>
+
+      <div class="setup-actions">
+        <button id="setupConnect" class="solid-btn">Connect &amp; start</button>
+      </div>
+
+      <details class="setup-advanced" id="devProxyBox">
+        <summary>Dev setup (already done for you)</summary>
+        <p class="hint">Toggl’s API can’t be called from a browser, so a tiny stateless Google Apps Script relay sits in between. The dev deploys it once; it holds no tokens. Paste its <code>/exec</code> URL here only if it isn’t already built into the app.</p>
+        <input id="setupProxy" type="url" placeholder="https://script.google.com/macros/s/AKfy…/exec" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </details>
+
+      <div id="setupStatus" class="setup-status"></div>
+      <p class="setup-foot">Your token is stored only on this device and sent through the relay to Toggl. Your wear data lives in <em>your</em> Toggl — never anyone else’s account. Revoke the token anytime in Toggl’s profile settings.</p>
+    </section>
+
+    <!-- ---- SIRI panel ---- -->
+    <section id="panelSiri" class="setup-panel" role="tabpanel" aria-labelledby="tabSiri" hidden>
+      <h1>Set up Siri</h1>
+      <p class="siri-lead">Say <strong>“Hey Siri, Aligners off”</strong> when you eat and <strong>“Aligners on”</strong> when you’re done — hands-free, phone locked — plus lock-screen reminders to put them back in. <strong>Both halves matter:</strong> the voice logs your time, the reminders make sure they go back in. Tap each step to open it; do them in order.</p>
+      <p id="siriNeedsSetup" class="siri-warn" hidden>First connect the app to your Toggl (the <strong>Connect</strong> tab above). Then come back — the links below fill in with your own token automatically.</p>
+
+      <details class="siri-acc" open>
+        <summary><span class="sc">0</span>Make the reminders list</summary>
+        <div class="acc-body">
+          <p>Open the <strong>Reminders</strong> app (white icon with coloured dots). Tap <strong>Add List</strong> (bottom-right), name it <strong>exactly</strong> <code>Aligners</code> (capital A), pick any colour, tap <strong>Done</strong>.</p>
+          <p class="siri-note">Why reminders, not a plain alert? iPhone reminders ring on your lock screen even on silent — exactly what you want at the dinner table.</p>
+        </div>
+      </details>
+
+      <details class="siri-acc">
+        <summary><span class="sc">1</span>Build the “Aligners Off” shortcut</summary>
+        <div class="acc-body">
+          <p>Open <strong>Shortcuts</strong>, tap <strong>＋</strong> (top-right), tap the name at the top and rename it <strong>exactly</strong> <code>Aligners Off</code>. The exact name is how Siri knows what to run.</p>
+          <p><strong>Action 1 — log that they came out.</strong> Tap <strong>＋ Add Action</strong>, search <strong>Get Contents of URL</strong>, add it. Set <strong>Method</strong> to <strong>GET</strong>, then paste this into the URL field (Copy — your token’s baked in):</p>
+          <div class="copybox"><code data-fill="out-url">…</code><button class="copy-btn" data-copy="out-url">Copy</button></div>
+          <p class="siri-note">That’s the only web call this app needs. Nice and easy.</p>
+          <p><strong>Action 2 — the 45-min nudge.</strong> Add <strong>Adjust Date</strong>: tap the blue <strong>Date</strong> → <strong>Current Date</strong>, keep it on <strong>Add</strong>, set <strong>45 Minutes</strong>. Then add <strong>Add New Reminder</strong>: text <code>Put your aligners back in 🦷</code>, tap <strong>Show More</strong>, <strong>List</strong> = <code>Aligners</code>, <strong>Alert</strong> = the <strong>Adjusted Date</strong> chip.</p>
+          <p><strong>Action 3 — the 90-min nudge.</strong> Same pair again: <strong>Adjust Date</strong> (Current Date, Add, <strong>90 Minutes</strong>), then <strong>Add New Reminder</strong> <code>Aligners out 90 min — wrap it up 🦷</code>, List <code>Aligners</code>, Alert = that new Adjusted Date.</p>
+          <div class="reminders">
+            <div><span class="t">+45 min</span> “Put your aligners back in 🦷”</div>
+            <div><span class="t">+90 min</span> “Aligners out 90 min — wrap it up 🦷”</div>
+          </div>
+          <p class="siri-note">Nudges count from when you take them out — a friendly “you’ve been out a while”, not a countdown. The real out-budget lives in the ring on the main screen.</p>
+        </div>
+      </details>
+
+      <details class="siri-acc">
+        <summary><span class="sc">2</span>Build the “Aligners On” shortcut</summary>
+        <div class="acc-body">
+          <p>Back in <strong>Shortcuts</strong>, tap <strong>＋</strong> for a new one, rename it <strong>exactly</strong> <code>Aligners On</code>.</p>
+          <p><strong>Action 1 — log that they went in.</strong> Add <strong>Get Contents of URL</strong>, <strong>Method</strong> = <strong>GET</strong>, paste this URL:</p>
+          <div class="copybox"><code data-fill="in-url">…</code><button class="copy-btn" data-copy="in-url">Copy</button></div>
+          <p><strong>Action 2 — clear the nudges.</strong> Add <strong>Find Reminders</strong>: <strong>Add Filter</strong> → <strong>List</strong> is <code>Aligners</code>; <strong>Add Filter</strong> → <strong>Is Completed</strong> is <strong>off</strong>. Then add <strong>Remove Reminders</strong> with those found reminders as its input.</p>
+        </div>
+      </details>
+
+      <details class="siri-acc">
+        <summary><span class="sc">3</span>Make Siri run them hands-free</summary>
+        <div class="acc-body">
+          <p>Open each shortcut’s details (the <strong>ⓘ</strong> button) and turn <strong>OFF “Ask Before Running.”</strong> That lets Siri run them with the phone locked.</p>
+          <p>Test it: lock your phone and say <strong>“Hey Siri, Aligners off”</strong> — then later <strong>“Hey Siri, Aligners on.”</strong> 🎉</p>
+        </div>
+      </details>
+    </section>
   </div>
 </main>
 
@@ -88,70 +147,15 @@
   </section>
 
   <section class="voice-card">
-    <h2 class="section-title">Hands-free</h2>
-    <p>Say <strong>“Hey Siri, Aligners off”</strong> when you eat and <strong>“Aligners on”</strong> when you’re done. Set the two Shortcuts up once — voice logging plus lock-screen reminders to put them back in.</p>
-    <button id="siriHelp" class="solid-btn">Set up Siri (voice + reminders)</button>
+    <p class="voice-hint">Hands-free: say <strong>“Hey Siri, Aligners off”</strong> / <strong>“on”</strong>. Set up voice + reminders under <a href="#" id="voiceSetupLink">Settings&nbsp;⚙</a>.</p>
     <p class="voice-src">Every out-window is a <strong>Toggl time entry</strong> named “Aligners OUT”. Edit, split, or delete an entry in <a href="https://track.toggl.com/timer" target="_blank" rel="noopener">Toggl</a> and this app reflects it on the next refresh.</p>
   </section>
 
   <footer class="foot"><span id="lastSync">—</span></footer>
 </main>
 
-<!-- ============ SIRI SETUP HELPER (modal) ============ -->
-<div id="siriModal" class="siri-modal" hidden>
-  <div class="siri-sheet">
-    <button id="siriClose" class="setup-close" aria-label="Close" title="Close">✕</button>
-    <h2 class="siri-title">Set up Siri — voice + reminders</h2>
-    <p class="siri-lead">This is a one-time setup on your iPhone. We’ll build two little shortcuts so you can just say <strong>“Hey Siri, Aligners off”</strong> when you eat and <strong>“Aligners on”</strong> when you’re done — hands-free, phone locked — and get lock-screen reminders to put them back in. Take it one numbered step at a time; nothing here is hard. <strong>Both halves matter</strong> — the voice logs your time, the reminders make sure they go back in.</p>
-    <p id="siriNeedsSetup" class="siri-warn" hidden>First connect the app to your Toggl (tap the gear ⚙ on the main screen). Then come back here and the web links below will be filled in with your own token automatically.</p>
-
-    <section class="siri-step">
-      <h3><span class="sc">0</span>One-time: make the reminders list</h3>
-      <p>Find the <strong>Reminders</strong> app on your phone (the white icon with coloured dots) and open it.</p>
-      <p>Tap <strong>Add List</strong> at the bottom right. Name it <strong>exactly</strong> <code>Aligners</code> (capital A, nothing else), pick any colour, and tap <strong>Done</strong>.</p>
-      <p class="siri-note">Why reminders and not just a phone alert? iPhone reminders ring on your lock screen even when your phone is on silent — that’s exactly what you want at the dinner table. That’s the whole trick.</p>
-    </section>
-
-    <section class="siri-step">
-      <h3><span class="sc">1</span>Build the “Aligners Off” shortcut</h3>
-      <p>Open the <strong>Shortcuts</strong> app (comes with your iPhone). Tap the <strong>＋</strong> in the top-right corner to start a new one.</p>
-      <p>At the very top you’ll see a name like “New Shortcut” — tap it and rename it <strong>exactly</strong> <code>Aligners Off</code>. The exact name matters: it’s how Siri knows what to run when you speak.</p>
-      <p><strong>Now add the actions, one at a time.</strong> Each time, tap <strong>＋ Add Action</strong>, type the name in the search box, and tap it when it appears.</p>
-
-      <p style="margin-top:14px"><strong>Action 1 — log that they came out.</strong> Add an action called <strong>Get Contents of URL</strong>. It’ll show a URL field and a Method. Set the <strong>Method</strong> to <strong>GET</strong>, then tap the URL field and paste this in (tap Copy — it already has your Toggl token baked in):</p>
-      <div class="copybox"><code data-fill="out-url">…</code><button class="copy-btn" data-copy="out-url">Copy</button></div>
-      <p class="siri-note">That’s the only backend action for this app — one web call does it. Nice and easy.</p>
-
-      <p style="margin-top:14px"><strong>Action 2 — the 45-minute nudge (two actions together).</strong> First add <strong>Adjust Date</strong>. Tap the blue <strong>Date</strong> word in it and choose <strong>Current Date</strong>. Make sure it says <strong>Add</strong> (not Subtract), and set the amount to <strong>45 Minutes</strong>.</p>
-      <p>Then add <strong>Add New Reminder</strong> right after it. Where it says “Reminder”, type <code>Put your aligners back in 🦷</code>. Tap <strong>Show More</strong>, set <strong>List</strong> to <code>Aligners</code>, and set the <strong>Alert</strong> (or Due Date) to the <strong>Adjusted Date</strong> chip — that blue chip is the result of the Adjust Date action you just added.</p>
-
-      <p style="margin-top:14px"><strong>Action 3 — the 90-minute nudge.</strong> Do the exact same pair again: <strong>Adjust Date</strong> (Current Date, Add, <strong>90 Minutes</strong>), then <strong>Add New Reminder</strong> with the text <code>Aligners out 90 min — wrap it up 🦷</code>, List <code>Aligners</code>, Alert = that new Adjusted Date.</p>
-      <div class="reminders">
-        <div><span class="t">+45 min</span> “Put your aligners back in 🦷”</div>
-        <div><span class="t">+90 min</span> “Aligners out 90 min — wrap it up 🦷”</div>
-      </div>
-      <p class="siri-note">These nudges count from the moment you take your aligners out — think of them as a friendly “you’ve been out a while” tap on the shoulder, not a countdown. The real number — how much out-time you’ve got left today — always lives in the ring on the app’s main screen.</p>
-    </section>
-
-    <section class="siri-step">
-      <h3><span class="sc">2</span>Build the “Aligners On” shortcut</h3>
-      <p>Back in <strong>Shortcuts</strong>, tap <strong>＋</strong> for a brand-new shortcut and rename it <strong>exactly</strong> <code>Aligners On</code>.</p>
-      <p><strong>Action 1 — log that they went back in.</strong> Add <strong>Get Contents of URL</strong>, set the <strong>Method</strong> to <strong>GET</strong>, and paste this link into the URL field:</p>
-      <div class="copybox"><code data-fill="in-url">…</code><button class="copy-btn" data-copy="in-url">Copy</button></div>
-      <p style="margin-top:14px"><strong>Action 2 — clear the nudges.</strong> Add <strong>Find Reminders</strong>. Tap <strong>Add Filter</strong> and set <strong>List</strong> is <code>Aligners</code>; tap <strong>Add Filter</strong> again and set <strong>Is Completed</strong> to <strong>off</strong> (the ones that haven’t fired yet).</p>
-      <p>Then add <strong>Remove Reminders</strong>. Its input should already be the reminders you just found — if not, tap its input and pick that. This wipes the pending nudges the moment your aligners are back in.</p>
-    </section>
-
-    <section class="siri-step">
-      <h3><span class="sc">3</span>Make Siri run them hands-free</h3>
-      <p>Open each shortcut’s details (tap the <strong>ⓘ</strong> info button, or the “…” then settings) and turn <strong>OFF “Ask Before Running.”</strong> This is what lets Siri run them while your phone is locked, without you tapping anything.</p>
-      <p>That’s it. Test it: lock your phone and say <strong>“Hey Siri, Aligners off”</strong> — then later <strong>“Hey Siri, Aligners on.”</strong> 🎉</p>
-    </section>
-  </div>
-</div>
-
 <script src="./wear-core.js?v=4"></script>
 <script src="./toggl-store.js?v=5"></script>
-<script src="./app.js?v=6"></script>
+<script src="./app.js?v=7"></script>
 </body>
 </html>
