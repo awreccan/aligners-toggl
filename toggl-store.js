@@ -73,13 +73,20 @@
     let execUrl = opts.execUrl || null;
     // The USER's own Toggl API token — sent to the stateless relay per request,
     // so wear entries land in THAT user's Toggl. The relay stores no tokens.
-    let token = opts.token || null;
+    // Copy/paste smuggles invisible junk (curly quotes, nbsp, zero-width, stray
+    // whitespace/newlines) into the token; any of it corrupts the request and
+    // Toggl rejects it (402/403). Toggl tokens are pure hex/ASCII, so strip
+    // everything that isn't a token character. (Root cause of a real 402 report.)
+    function cleanToken(t) {
+      return t == null ? null : (String(t).match(/[A-Za-z0-9_]+/g) || []).join('') || null;
+    }
+    let token = cleanToken(opts.token);
     // Device timezone so the proxy resolves "today" the same way the phone does.
     const tz = opts.tz ||
       ((typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'UTC');
 
     function setExecUrl(u) { execUrl = u; }
-    function setToken(t) { token = t; }
+    function setToken(t) { token = cleanToken(t); }
     // Configured = we have both the relay URL AND the user's token.
     function isConfigured() { return !!execUrl && !!token; }
 

@@ -67,7 +67,9 @@
 
   // ---- setup flow ----------------------------------------------------------
   async function doConnect() {
-    const token = (els.setupToken.value || '').trim();
+    // Strip invisible paste-cruft (curly quotes, nbsp, zero-width, whitespace) —
+    // it silently corrupts the token and Toggl returns 402/403. Tokens are ASCII.
+    const token = ((els.setupToken.value || '').match(/[A-Za-z0-9_]+/g) || []).join('');
     // Dev-box proxy override is optional; default is the built-in relay URL.
     const proxyOverride = (els.setupProxy && els.setupProxy.value || '').trim();
     const proxy = proxyOverride || proxyUrl();
