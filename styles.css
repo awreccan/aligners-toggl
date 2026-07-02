@@ -36,8 +36,14 @@ body {
 
 /* ===== setup screen ===== */
 .setup { max-width: 480px; margin: 0 auto; padding: 24px 18px 60px; min-height: 100%; display: flex; align-items: center; }
-.setup-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+.setup-card { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 26px 22px; box-shadow: var(--shadow); width: 100%; }
+/* X to leave settings — only shown (via JS) when a backend is already configured,
+   so first-run users (nothing to return to) don't see a dead-end close. */
+.setup-close { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;
+  background: var(--line); border: none; border-radius: 50%; color: var(--ink);
+  font-size: 16px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
+.setup-close:active { opacity: .7; }
 .setup-brand { margin-bottom: 16px; }
 .setup-card h1 { font-size: 24px; margin: 0 0 6px; letter-spacing: -.02em; }
 .setup-lead { color: var(--muted); font-size: 15px; margin: 0 0 18px; }
@@ -64,6 +70,12 @@ body {
 .icon-btn { background: none; border: none; color: var(--muted); font-size: 19px; cursor: pointer;
   padding: 4px; line-height: 1; border-radius: 8px; }
 .icon-btn:active { background: var(--line); }
+/* #syncBtn spins whenever a sync runs — manual tap OR any auto-refresh — so the
+   background sync is visible and trustworthy. */
+#syncBtn { transition: color .2s; }
+#syncBtn.syncing { color: var(--green); animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { #syncBtn.syncing { animation: none; opacity: .5; } }
 .brand {
   font-family: var(--mono); font-weight: 700; font-size: 22px;
   background: var(--green); color: #fff; width: 40px; height: 40px;
@@ -146,6 +158,46 @@ code { font-family: var(--mono); font-size: .85em; background: var(--line);
 @media (prefers-color-scheme: dark) { .solid-btn { color: #07120d; } }
 
 .foot { text-align: center; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* voice card: Siri helper button + source-of-truth note */
+.voice-card .solid-btn { width: 100%; padding: 12px; font-size: 15px; font-weight: 600; margin-top: 4px; }
+.voice-src { margin: 14px 0 0 !important; font-size: 12.5px; }
+.voice-src a { color: var(--green); font-weight: 600; }
+
+/* ===== Siri setup helper (modal) ===== */
+.siri-modal { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.5);
+  display: flex; align-items: flex-start; justify-content: center; overflow-y: auto;
+  padding: env(safe-area-inset-top) 0 40px; }
+.siri-sheet { position: relative; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow); width: min(94vw, 560px);
+  margin: 24px 12px; padding: 24px 22px 28px; }
+.siri-title { font-size: 21px; margin: 0 34px 6px 0; letter-spacing: -.02em; }
+.siri-lead { color: var(--muted); font-size: 14.5px; margin: 0 0 14px; }
+.siri-lead strong { color: var(--ink); }
+.siri-warn { background: var(--line); border-radius: 12px; padding: 10px 12px;
+  font-size: 13px; color: var(--ink); margin: 0 0 14px; }
+.siri-step { margin: 18px 0; }
+.siri-step h3 { font-size: 15px; margin: 0 0 6px; display: flex; align-items: center; gap: 9px; }
+.siri-step p { font-size: 14px; color: var(--muted); margin: 6px 0; }
+.siri-step p strong { color: var(--ink); }
+.siri-step .sc { font-family: var(--mono); background: var(--green); color: #fff;
+  width: 26px; height: 26px; display: inline-grid; place-items: center; border-radius: 8px;
+  font-size: 13px; flex: none; }
+@media (prefers-color-scheme: dark) { .siri-step .sc { color: #07120d; } }
+.siri-note { font-size: 12.5px !important; font-style: italic; }
+.copybox { display: flex; align-items: stretch; gap: 8px; margin: 8px 0; }
+.copybox code { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; overflow-wrap: anywhere; word-break: break-all; }
+.copy-btn { flex: none; background: var(--green); color: #fff; border: none; border-radius: 10px;
+  padding: 0 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+@media (prefers-color-scheme: dark) { .copy-btn { color: #07120d; } }
+.copy-btn:active { opacity: .8; }
+.copy-btn.copied { background: var(--green-deep); }
+.reminders { font-family: var(--mono); font-size: 13px; background: var(--bg);
+  border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin: 8px 0; }
+.reminders div { padding: 4px 0; }
+.reminders .t { color: var(--amber); font-weight: 700; display: inline-block; width: 72px; }
 
 /* respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
