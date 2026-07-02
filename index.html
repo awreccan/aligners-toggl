@@ -101,42 +101,56 @@
   <div class="siri-sheet">
     <button id="siriClose" class="setup-close" aria-label="Close" title="Close">✕</button>
     <h2 class="siri-title">Set up Siri — voice + reminders</h2>
-    <p class="siri-lead">Two iPhone Shortcuts named exactly <strong>Aligners Off</strong> and <strong>Aligners On</strong>. Voice makes logging effortless while you eat; the reminders make sure you actually put them back in. <strong>Set up both.</strong></p>
-    <p id="siriNeedsSetup" class="siri-warn" hidden>Connect the app to your Toggl first (tap the gear ⚙) — then reopen this and the URLs below will be pre-filled with your token.</p>
+    <p class="siri-lead">This is a one-time setup on your iPhone. We’ll build two little shortcuts so you can just say <strong>“Hey Siri, Aligners off”</strong> when you eat and <strong>“Aligners on”</strong> when you’re done — hands-free, phone locked — and get lock-screen reminders to put them back in. Take it one numbered step at a time; nothing here is hard. <strong>Both halves matter</strong> — the voice logs your time, the reminders make sure they go back in.</p>
+    <p id="siriNeedsSetup" class="siri-warn" hidden>First connect the app to your Toggl (tap the gear ⚙ on the main screen). Then come back here and the web links below will be filled in with your own token automatically.</p>
 
     <section class="siri-step">
-      <h3><span class="sc">A</span>“Aligners Off” — the backend action</h3>
-      <p>One <strong>Get Contents of URL</strong> action. Method <strong>GET</strong>. Paste this URL (it already has your token):</p>
+      <h3><span class="sc">0</span>One-time: make the reminders list</h3>
+      <p>Find the <strong>Reminders</strong> app on your phone (the white icon with coloured dots) and open it.</p>
+      <p>Tap <strong>Add List</strong> at the bottom right. Name it <strong>exactly</strong> <code>Aligners</code> (capital A, nothing else), pick any colour, and tap <strong>Done</strong>.</p>
+      <p class="siri-note">Why reminders and not just a phone alert? iPhone reminders ring on your lock screen even when your phone is on silent — that’s exactly what you want at the dinner table. That’s the whole trick.</p>
+    </section>
+
+    <section class="siri-step">
+      <h3><span class="sc">1</span>Build the “Aligners Off” shortcut</h3>
+      <p>Open the <strong>Shortcuts</strong> app (comes with your iPhone). Tap the <strong>＋</strong> in the top-right corner to start a new one.</p>
+      <p>At the very top you’ll see a name like “New Shortcut” — tap it and rename it <strong>exactly</strong> <code>Aligners Off</code>. The exact name matters: it’s how Siri knows what to run when you speak.</p>
+      <p><strong>Now add the actions, one at a time.</strong> Each time, tap <strong>＋ Add Action</strong>, type the name in the search box, and tap it when it appears.</p>
+
+      <p style="margin-top:14px"><strong>Action 1 — log that they came out.</strong> Add an action called <strong>Get Contents of URL</strong>. It’ll show a URL field and a Method. Set the <strong>Method</strong> to <strong>GET</strong>, then tap the URL field and paste this in (tap Copy — it already has your Toggl token baked in):</p>
       <div class="copybox"><code data-fill="out-url">…</code><button class="copy-btn" data-copy="out-url">Copy</button></div>
-    </section>
+      <p class="siri-note">That’s the only backend action for this app — one web call does it. Nice and easy.</p>
 
-    <section class="siri-step">
-      <h3><span class="sc">B</span>“Aligners On” — the backend action</h3>
-      <p>Same single <strong>Get Contents of URL</strong> action (GET) — just a different URL:</p>
-      <div class="copybox"><code data-fill="in-url">…</code><button class="copy-btn" data-copy="in-url">Copy</button></div>
-    </section>
+      <p style="margin-top:14px"><strong>Action 2 — the 45-minute nudge (two actions together).</strong> First add <strong>Adjust Date</strong>. Tap the blue <strong>Date</strong> word in it and choose <strong>Current Date</strong>. Make sure it says <strong>Add</strong> (not Subtract), and set the amount to <strong>45 Minutes</strong>.</p>
+      <p>Then add <strong>Add New Reminder</strong> right after it. Where it says “Reminder”, type <code>Put your aligners back in 🦷</code>. Tap <strong>Show More</strong>, set <strong>List</strong> to <code>Aligners</code>, and set the <strong>Alert</strong> (or Due Date) to the <strong>Adjusted Date</strong> chip — that blue chip is the result of the Adjust Date action you just added.</p>
 
-    <section class="siri-step">
-      <h3><span class="sc">R</span>Reminders (same for everyone)</h3>
-      <p><strong>One-time:</strong> open the <strong>Reminders</strong> app → <strong>Add List</strong> → name it exactly <strong>Aligners</strong>.</p>
-      <p>In <strong>“Aligners Off”</strong>, after the URL action, add two nudges. For each: an <strong>Adjust Date</strong> (Current Date, <strong>Add</strong>, 45 min then 90 min) → <strong>Add New Reminder</strong> (List = <strong>Aligners</strong>, Alert = the adjusted date):</p>
+      <p style="margin-top:14px"><strong>Action 3 — the 90-minute nudge.</strong> Do the exact same pair again: <strong>Adjust Date</strong> (Current Date, Add, <strong>90 Minutes</strong>), then <strong>Add New Reminder</strong> with the text <code>Aligners out 90 min — wrap it up 🦷</code>, List <code>Aligners</code>, Alert = that new Adjusted Date.</p>
       <div class="reminders">
         <div><span class="t">+45 min</span> “Put your aligners back in 🦷”</div>
         <div><span class="t">+90 min</span> “Aligners out 90 min — wrap it up 🦷”</div>
       </div>
-      <p class="siri-note">These count from the moment you take them out — a “you’ve been out a while” nudge. Your true remaining daily out-budget is the ring in the app.</p>
-      <p>In <strong>“Aligners On”</strong>, after its URL action: <strong>Find Reminders</strong> (List = Aligners, Is Completed = off) → <strong>Remove Reminders</strong> — this clears any pending nudges.</p>
+      <p class="siri-note">These nudges count from the moment you take your aligners out — think of them as a friendly “you’ve been out a while” tap on the shoulder, not a countdown. The real number — how much out-time you’ve got left today — always lives in the ring on the app’s main screen.</p>
     </section>
 
     <section class="siri-step">
-      <h3><span class="sc">✓</span>Make them hands-free</h3>
-      <p>Name them exactly <strong>Aligners Off</strong> / <strong>Aligners On</strong>. On each, open its details and turn <strong>OFF “Ask Before Running”</strong> so Siri runs them with the phone locked.</p>
+      <h3><span class="sc">2</span>Build the “Aligners On” shortcut</h3>
+      <p>Back in <strong>Shortcuts</strong>, tap <strong>＋</strong> for a brand-new shortcut and rename it <strong>exactly</strong> <code>Aligners On</code>.</p>
+      <p><strong>Action 1 — log that they went back in.</strong> Add <strong>Get Contents of URL</strong>, set the <strong>Method</strong> to <strong>GET</strong>, and paste this link into the URL field:</p>
+      <div class="copybox"><code data-fill="in-url">…</code><button class="copy-btn" data-copy="in-url">Copy</button></div>
+      <p style="margin-top:14px"><strong>Action 2 — clear the nudges.</strong> Add <strong>Find Reminders</strong>. Tap <strong>Add Filter</strong> and set <strong>List</strong> is <code>Aligners</code>; tap <strong>Add Filter</strong> again and set <strong>Is Completed</strong> to <strong>off</strong> (the ones that haven’t fired yet).</p>
+      <p>Then add <strong>Remove Reminders</strong>. Its input should already be the reminders you just found — if not, tap its input and pick that. This wipes the pending nudges the moment your aligners are back in.</p>
+    </section>
+
+    <section class="siri-step">
+      <h3><span class="sc">3</span>Make Siri run them hands-free</h3>
+      <p>Open each shortcut’s details (tap the <strong>ⓘ</strong> info button, or the “…” then settings) and turn <strong>OFF “Ask Before Running.”</strong> This is what lets Siri run them while your phone is locked, without you tapping anything.</p>
+      <p>That’s it. Test it: lock your phone and say <strong>“Hey Siri, Aligners off”</strong> — then later <strong>“Hey Siri, Aligners on.”</strong> 🎉</p>
     </section>
   </div>
 </div>
 
 <script src="./wear-core.js?v=4"></script>
 <script src="./toggl-store.js?v=4"></script>
-<script src="./app.js?v=4"></script>
+<script src="./app.js?v=5"></script>
 </body>
 </html>
